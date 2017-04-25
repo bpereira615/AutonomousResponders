@@ -1,16 +1,3 @@
-#define FRONT_RIGHT A0
-#define FRONT_LEFT A2
-//#define FRONT_CENTER A2
-#define BACK_RIGHT A1
-#define BACK_LEFT A3
-
-
-
-
-#include <SoftwareSerial.h>
-
-SoftwareSerial XBee(10, 11);
-
 //IMU LIBRARIES
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
@@ -18,7 +5,7 @@ SoftwareSerial XBee(10, 11);
 #include <utility/imumaths.h>
 #define BNO055_SAMPLERATE_DELAY_MS (100)
 
-
+//IMU Initialization
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
 int azm=0;//0 up, 1 right, 2 down, 3 right
 float up;
@@ -26,12 +13,12 @@ float down;
 float Lleft;
 float Rright;
 
-
-
-
-
-
-
+//IR Sensor Pins
+#define FRONT_RIGHT A1
+#define FRONT_LEFT A2
+//#define FRONT_CENTER A2
+#define BACK_RIGHT A0
+#define BACK_LEFT A3
 
 
 //TODO: fine tune threshold
@@ -40,13 +27,11 @@ const int numAvg = 10;
 //threshold for detecting objects head on
 const int front_thresh = 450;
 
-//threshold for state 2 detection
+//threshold for orthogonal sensor detection (state 2)
 const int back_thresh = 300;
 
-
-//TODO: calibration
-const int starting_pos = 50;
-const int unit_distance = 66 / 3; //18 inches
+//for navigating square blocks
+const int unit_distance = 66 / 3;
 
 //control of speed, INVERSE
 int speed_control = 1;
@@ -81,7 +66,6 @@ void setup() {
   
   Serial.begin(9600);
 
-  XBee.begin(9600);
 
   pinMode(left, OUTPUT);//DC motor on/off
   pinMode(l1, OUTPUT);//DC direction 1
@@ -92,104 +76,28 @@ void setup() {
   pinMode(2, INPUT);
   pinMode(3, INPUT);
   
+  pinMode(13, OUTPUT); //LED for IMU calibration 
 
-
-  pinMode(13, OUTPUT);
-  
+  //Encoder setup
   attachInterrupt(digitalPinToInterrupt(2), RightDistance, FALLING);
   attachInterrupt(digitalPinToInterrupt(3), LeftDistance, FALLING);
 
-
-
-
-
-
-
-  
-  if(!bno.begin())
-  {
-    // There was a problem detecting the BNO055 ... check your connections 
-    Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
-    while(1);
-  }
-
-  
-
-  digitalWrite(13, HIGH);
-
-  
-  bno.setExtCrystalUse(true);
-  delay(200);
-  Serial.println("Calibrate sensor");
-  delay(10000);
-  digitalWrite(13, LOW);
-  Serial.println("Stop moving");
-  delay(4000);
-
-  sensors_event_t event;
-  bno.getEvent(&event);
-  up=event.orientation.x;
-  if(up>270){
-    Lleft=up-90;
-    down=up-180;
-    Rright=up-270;
-  }else if(up>180){
-    Lleft=up-90;
-    down=up-180;
-    Rright=up+90;
-  }else if(up>90){
-    Lleft=up-90;
-    down=up+180;
-    Rright=up+90;
-  }else{
-    Lleft=up+270;
-    down=up+180;
-    Rright=up+90;
-  }
-
-  
-
-  
-
-
-
-
-  
-  
-  int back_left = sample(BACK_LEFT, numAvg);
-  while(back_left < back_thresh) {
-    Serial.println(back_left);
-    moveForward();
-    back_left = sample(BACK_LEFT, numAvg);
-  }
-  delay(1000);
-  
-  obstacle_avoidance(unit_distance * 0.75);
-  delay(1000);
-  
-
+  //calibrateIMU();
 }
 
 void loop() {
-/*
-  int test = obstacle_avoidance(unit_distance);
-  Serial.println(test );
-  delay(1000);
-  if(test != 0) {
-    obstacle_avoidance(5);
-  }
-  delay(20000000);
-  */
 
+  //sensorTest();
 
-/*
-  front_right = sample(FRONT_RIGHT, numAvg);
-  front_left = sample(FRONT_LEFT, numAvg);
-  back_right = sample(BACK_RIGHT, numAvg);
-  back_left = sample(BACK_LEFT, numAvg);
-  Serial.println(back_left);
   
-*/
+  //move into initial position
+  int back_left = sample(BACK_LEFT, numAvg);
+  while(back_left < back_thresh) {
+    Serial.println(back_left);
+    moveForward(1);
+    back_left = sample(BACK_LEFT, numAvg);
+  }
+  obstacle_avoidance(unit_distance * 0.75);
   
 
   
@@ -230,7 +138,6 @@ void loop() {
 
   //move to exit choice
   obstacle_avoidance(unit_distance * 2.5);
-  delay(1000);
 
   temp_blocked = false;
 
@@ -240,30 +147,27 @@ void loop() {
   turnLeft();
 
 
-  if(sample(FRONT_RIGHT, numAvg) > (front_thresh - 150)) {
-    delay(1000);
+  if(sample(BACK_LEFT, numAvg) > (250)) { //exit blocked
+    turnLeft();
     turnLeft();
     obstacle_avoidance(unit_distance * 2.5);
     delay(1000);
     turnRight();
-    obstacle_avoidance(unit_distance * 2);
+    moveForward(unit_distance * 2);
     delay(1000);
     turnRight();
     obstacle_avoidance(unit_distance * 2.5);
     delay(1000);
   } else {
-    obstacle_avoidance(unit_distance * 1);
-    delay(1000);
+    turnLeft();
+
+    moveForward(unit_distance);
   }
 
-  
-  
-  
   //send signal to crane to begin
-  XBee.write(3);
-  while(0){}
+  Serial.println('x');
 
- 
+  delay(2000000); //TODO: exit program
 }
 
 
@@ -352,7 +256,7 @@ void changeState(int state) {
   
   if(state == 0) {
     Serial.println("State 0 - Forward...");
-    moveForward();
+    moveForward(1);
   } else if(state == 1) {
     //TODO: may want to take multiple measurements, look at last few samples?
     Serial.println("State 1 - Turning...");
@@ -369,7 +273,7 @@ void changeState(int state) {
     //keep moving while there is something blocking, and check that forward is free
     blocked = false;
     while((back > back_thresh)) {
-      moveForward();
+      moveForward(1);
       blocked = checkFront();
       if(blocked) {
         break;
@@ -382,7 +286,7 @@ void changeState(int state) {
     //move foreward a bit to ensure that wheels do not catch
     for(int i = 0; i < wheel_clear; i++) {
       //drive forward
-      moveForward();
+      moveForward(1);
       blocked = checkFront();
       if(blocked) {
         break;
@@ -497,7 +401,7 @@ void turnLeft(){
   return; 
   
 }
-void moveForward(){//forward method, takes number of shaft revolutions
+void moveForward(int dist){//forward method, takes number of shaft revolutions
   ldist=0;//rezeros distance counter to avoid issues with int rollover
   rdist=0;
   int oldxr=rdist;//intermediate variables for while loops
@@ -506,7 +410,7 @@ void moveForward(){//forward method, takes number of shaft revolutions
   digitalWrite(l2,LOW);
   digitalWrite(r1,HIGH);
   digitalWrite(r2,LOW); 
-  while(ldist<25){//run until robot has moved far enough forward
+  while(ldist<25 * dist){//run until robot has moved far enough forward
     digitalWrite(right,HIGH);//pair of while loops to ensure that one wheel does not get too far
     while(rdist==oldxr){}//ahead of other wheel, uses encoders to monitor
     digitalWrite(right,LOW);
@@ -528,4 +432,59 @@ void LeftDistance(){////handles interrupt from left wheel motor encoder
   ldist++;
 }
 
+void sensorTest() {
+  front_right = sample(FRONT_RIGHT, numAvg);
+  front_left = sample(FRONT_LEFT, numAvg);
+  back_right = sample(BACK_RIGHT, numAvg);
+  back_left = sample(BACK_LEFT, numAvg);
+  Serial.print(back_left);
+  Serial.print('\t');
+  Serial.print(front_left);
+  Serial.print('\t');
+  Serial.print(front_right); 
+  Serial.print('\t');
+  Serial.print(back_right);
+  Serial.print('\n');
+}
+
+void calibrateIMU() {
+  if(!bno.begin())
+  {
+    // There was a problem detecting the BNO055 ... check your connections 
+    Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+    while(1);
+  }
+
+  digitalWrite(13, HIGH);
+
+  bno.setExtCrystalUse(true);
+  delay(200);
+  Serial.println("Calibrate sensor");
+  delay(10000);
+  digitalWrite(13, LOW);
+  Serial.println("Stop moving");
+  delay(4000);
+
+  sensors_event_t event;
+  bno.getEvent(&event);
+  up=event.orientation.x;
+  if(up>270){
+    Lleft=up-90;
+    down=up-180;
+    Rright=up-270;
+  }else if(up>180){
+    Lleft=up-90;
+    down=up-180;
+    Rright=up+90;
+  }else if(up>90){
+    Lleft=up-90;
+    down=up+180;
+    Rright=up+90;
+  }else{
+    Lleft=up+270;
+    down=up+180;
+    Rright=up+90;
+  }
+
+}
 
