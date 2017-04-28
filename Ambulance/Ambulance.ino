@@ -401,7 +401,21 @@ void turnLeft(){
   return; 
   
 }
-void moveForward(int dist){//forward method, takes number of shaft revolutions
+void moveForward(){//forward method, takes number of shaft revolutions
+//  /*
+  int lcorrect=0;
+  int rcorrect=0;
+  float currentHeading=0;
+  float newHeading;
+  if(azm==0){
+    newHeading=up;
+  }else if(azm==1){
+    newHeading=Rright;
+  }else if(azm==2){
+    newHeading=down;
+  }else if(azm==3){
+    newHeading=Lleft;
+  }
   ldist=0;//rezeros distance counter to avoid issues with int rollover
   rdist=0;
   int oldxr=rdist;//intermediate variables for while loops
@@ -410,7 +424,40 @@ void moveForward(int dist){//forward method, takes number of shaft revolutions
   digitalWrite(l2,LOW);
   digitalWrite(r1,HIGH);
   digitalWrite(r2,LOW); 
-  while(ldist<25 * dist){//run until robot has moved far enough forward
+  while(ldist<25){//run until robot has moved far enough forward
+    sensors_event_t event;
+    bno.getEvent(&event);
+    currentHeading=event.orientation.x;
+    if(newHeading-currentHeading>4){
+      lcorrect=1;
+    }else if(newHeading-currentHeading<-4){
+      rcorrect=1;
+    }else{
+      lcorrect=0;
+      rcorrect=0;
+    }
+    digitalWrite(right,HIGH);//pair of while loops to ensure that one wheel does not get too far
+    while(rdist==oldxr+rcorrect){}//ahead of other wheel, uses encoders to monitor
+    digitalWrite(right,LOW);
+    oldxr=rdist;
+    digitalWrite(left,HIGH);
+    while(ldist==oldxl+lcorrect){}
+    digitalWrite(left,LOW);
+    oldxl=ldist;
+    delay(speed_control);
+  }
+  return;
+ // */
+  /*
+  ldist=0;//rezeros distance counter to avoid issues with int rollover
+  rdist=0;
+  int oldxr=rdist;//intermediate variables for while loops
+  int oldxl=ldist;
+  digitalWrite(l1,HIGH);//both wheels forward
+  digitalWrite(l2,LOW);
+  digitalWrite(r1,HIGH);
+  digitalWrite(r2,LOW); 
+  while(ldist<25){//run until robot has moved far enough forward
     digitalWrite(right,HIGH);//pair of while loops to ensure that one wheel does not get too far
     while(rdist==oldxr){}//ahead of other wheel, uses encoders to monitor
     digitalWrite(right,LOW);
@@ -422,6 +469,7 @@ void moveForward(int dist){//forward method, takes number of shaft revolutions
     delay(speed_control);
   }
   return;
+  */
 }
 
 void RightDistance(){//handles interrupt from right wheel motor encoder
