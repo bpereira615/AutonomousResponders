@@ -34,7 +34,7 @@ const int back_thresh = 300;
 const int unit_distance = 66 / 3;
 
 //control of speed, INVERSE
-int speed_control = 1;
+int speed_control = 0;
 
 //timing required to make sure wheels clear obstacle
 const int wheel_clear = 5;
@@ -82,7 +82,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(2), RightDistance, FALLING);
   attachInterrupt(digitalPinToInterrupt(3), LeftDistance, FALLING);
 
-  //calibrateIMU();
+  calibrateIMU();
 }
 
 void loop() {
@@ -401,7 +401,7 @@ void turnLeft(){
   return; 
   
 }
-void moveForward(){//forward method, takes number of shaft revolutions
+void moveForward(int dist){//forward method, takes number of shaft revolutions
 //  /*
   int lcorrect=0;
   int rcorrect=0;
@@ -424,7 +424,7 @@ void moveForward(){//forward method, takes number of shaft revolutions
   digitalWrite(l2,LOW);
   digitalWrite(r1,HIGH);
   digitalWrite(r2,LOW); 
-  while(ldist<25){//run until robot has moved far enough forward
+  while(ldist<25*dist){//run until robot has moved far enough forward
     sensors_event_t event;
     bno.getEvent(&event);
     currentHeading=event.orientation.x;
