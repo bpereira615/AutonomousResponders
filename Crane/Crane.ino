@@ -26,6 +26,8 @@ void setup() {
   pinMode(CARRIAGE_BACKWARD, OUTPUT);
   
   analogWrite(CARRIAGE_MOTOR, 0);
+
+  delay(2000);//lets pixy find object
 }
 
 void loop() {
@@ -36,17 +38,13 @@ void loop() {
     }
   }
   */
-
-
-
-
-  moveForward();
-  delay(3000);
-  moveBackward();
-  delay(3000);
-  
-
 /*
+  forward();
+  delay(3000);
+  backward();
+  delay(3000); 
+*/
+///*
 
   
   refresh();
@@ -54,7 +52,7 @@ void loop() {
 //  Serial.println(yco);
   delay(1000);
 
-  */
+ // */
   
 }
 
@@ -68,14 +66,14 @@ void refresh(){
       }
     }
   }
-  
-
-  
+  /*
   if(xco>180){
     ccw();
   }else if(xco<140){
     cw();
-  }else if(yco>120){
+  }else 
+  */
+  if(yco>120){
     forward();
   }else if(yco<80){
     back();
@@ -87,16 +85,22 @@ void refresh(){
 }
 
 void forward(){
-  Serial.println("Crane claw forward!");
-  analogWrite(CARRIAGE_MOTOR, 200);
   digitalWrite(CARRIAGE_FORWARD, HIGH);
   digitalWrite(CARRIAGE_BACKWARD, LOW);
+  Serial.println("Crane claw forward!");
+  analogWrite(CARRIAGE_MOTOR, 200);
+  delay(200);
+  digitalWrite(CARRIAGE_MOTOR, LOW);
   return;
 }
 
 void back(){
+  digitalWrite(CARRIAGE_FORWARD, LOW);
+  digitalWrite(CARRIAGE_BACKWARD, HIGH);
   Serial.println("Crane claw backward!");
-  moveBackward();
+  analogWrite(CARRIAGE_MOTOR, 180);
+  delay(200);
+  digitalWrite(CARRIAGE_MOTOR, LOW);
   return;
 }
 
@@ -112,9 +116,4 @@ void cw(){
   return;
 }
 
-void moveBackward() {
-  analogWrite(CARRIAGE_MOTOR, 180);
-  digitalWrite(CARRIAGE_FORWARD, LOW);
-  digitalWrite(CARRIAGE_BACKWARD, HIGH);
-}
 
