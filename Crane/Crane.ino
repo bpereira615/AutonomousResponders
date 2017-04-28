@@ -88,7 +88,9 @@ void refresh(){
 
 void forward(){
   Serial.println("Crane claw forward!");
-  moveForward();
+  analogWrite(CARRIAGE_MOTOR, 200);
+  digitalWrite(CARRIAGE_FORWARD, HIGH);
+  digitalWrite(CARRIAGE_BACKWARD, LOW);
   return;
 }
 
@@ -108,12 +110,6 @@ void cw(){
   Serial.println("Crane boom clockwise!");
   analogWrite(CARRIAGE_MOTOR, 0);
   return;
-}
-
-void moveForward() {
-  analogWrite(CARRIAGE_MOTOR, 200);
-  digitalWrite(CARRIAGE_FORWARD, HIGH);
-  digitalWrite(CARRIAGE_BACKWARD, LOW);
 }
 
 void moveBackward() {
