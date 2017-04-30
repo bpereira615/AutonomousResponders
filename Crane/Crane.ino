@@ -1,11 +1,11 @@
 #define CARRIAGE_MOTOR 6
 #define CARRIAGE_FORWARD 4
-#define CARRIAGE_BACKWARD 5
+#define CARRIAGE_BACKWARD 7
 
 #define CLAW_SERVO 11
 
 //MOTOR PIN SETUP
-#define SPOOL 7
+#define SPOOL 5
 #define SPOOL_UP 8
 #define SPOOL_DOWN 9
 #define SPOOL_INTER 2
@@ -22,7 +22,7 @@ volatile int base_dist=0;
 
 
 #include <SPI.h>  
-//#include <Pixy.h>
+#include <Pixy.h>
 
 
 
@@ -40,7 +40,7 @@ int speed_control = 1;
 int base_speed = 255;
 
 //for forward/bachward movement of carraige
-int unit_time = 20;
+int unit_time = 100;
 
 //number number of encoder clicks
 int unit_encoder = 5;
@@ -54,9 +54,6 @@ void setup() {
   pinMode(CARRIAGE_MOTOR, OUTPUT);
   pinMode(CARRIAGE_FORWARD, OUTPUT);
   pinMode(CARRIAGE_BACKWARD, OUTPUT);
-
-  
-
 
   pinMode(SPOOL, OUTPUT);//DC motor on/off
   pinMode(SPOOL_UP, OUTPUT);//DC direction 1
@@ -89,8 +86,18 @@ void BaseDistance(){////handles interrupt from left wheel motor encoder
   base_dist++;
 }
 
-void loop() {
+void loop(){
   
+  digitalWrite(SPOOL_UP, HIGH);
+  digitalWrite(SPOOL_DOWN, LOW);
+  digitalWrite(SPOOL, HIGH);
+  delay(15);
+  digitalWrite(SPOOL, LOW);
+  delay(50);
+  //delay(1000);
+  //digitalWrite(BASE, LOW);
+  //delay(3000);
+  /*
   // see if there's incoming serial data:
   while (Serial.available() > 0) {
     // read the oldest byte in the serial buffer:
@@ -101,22 +108,20 @@ void loop() {
     }
   }
   
-/*
+
   forward();
   delay(3000);
   backward();
   delay(3000); 
 */
-///*
 
-  
+  /*
   refresh();
 //  Serial.println(xco);
-//  Serial.println(yco);
+  Serial.println(yco);
+  findObject();
   delay(1000);
-
- //*/
-  
+  */
 }
 
 void refresh(){
@@ -129,32 +134,35 @@ void refresh(){
       }
     }
   }
-  /*
-  if(xco>180){
-    ccw();
-  }else if(xco<140){
-    cw();
-  }else 
-  */
-  if(yco>120){
-    forward();
-  }else if(yco<80){
-    back();
-  }else{
-    Serial.println("Drop the claw!");
-    analogWrite(CARRIAGE_MOTOR, 0);
-    analogWrite(BASE, 0);
-    
-    claw_down(unit_encoder * 200);
+}
+
+void findObject(){
+  boolean found = false;
+  while(!found){
+    refresh();
+    /*
+    if(xco>180){
+      ccw();
+    }else if(xco<140){
+      cw();
+    }else 
+    */
+    if(yco<80){
+      forward();
+    }else if(yco>120){
+      back();
+    }else{
+      found=true;
+    }
   }
-  
 }
 
 void forward(){
   digitalWrite(CARRIAGE_FORWARD, HIGH);
   digitalWrite(CARRIAGE_BACKWARD, LOW);
-  Serial.println("Crane claw forward!");
-  analogWrite(CARRIAGE_MOTOR, 200); //TODO: calibration
+  Serial.print("Crane claw forward: ");
+  Serial.println(yco);
+  analogWrite(CARRIAGE_MOTOR, 255); //TODO: calibration
   delay(unit_time);
   digitalWrite(CARRIAGE_MOTOR, LOW);
   return;
@@ -163,8 +171,9 @@ void forward(){
 void back(){
   digitalWrite(CARRIAGE_FORWARD, LOW);
   digitalWrite(CARRIAGE_BACKWARD, HIGH);
-  Serial.println("Crane claw backward!");
-  analogWrite(CARRIAGE_MOTOR, 180);
+  Serial.print("Crane claw backward: ");
+  Serial.println(yco);
+  analogWrite(CARRIAGE_MOTOR, 255);
   delay(unit_time);
   digitalWrite(CARRIAGE_MOTOR, LOW);
   return;
