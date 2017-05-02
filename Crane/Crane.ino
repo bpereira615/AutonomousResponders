@@ -21,12 +21,12 @@ volatile int spool_dist=0;
 volatile int base_dist=0;
 
 
-#include <SPI.h>  
-#include <Pixy.h>
+#include <Wire.h>  
+#include <PixyI2C.h>
 
 
 
-Pixy pixy;
+PixyI2C pixy;
 int xco;
 int yco;
 int block;
@@ -87,7 +87,7 @@ void BaseDistance(){////handles interrupt from left wheel motor encoder
 }
 
 void loop(){
-  
+  /*
   digitalWrite(SPOOL_UP, HIGH);
   digitalWrite(SPOOL_DOWN, LOW);
   digitalWrite(SPOOL, HIGH);
@@ -97,6 +97,7 @@ void loop(){
   //delay(1000);
   //digitalWrite(BASE, LOW);
   //delay(3000);
+  */
   /*
   // see if there's incoming serial data:
   while (Serial.available() > 0) {
@@ -115,13 +116,13 @@ void loop(){
   delay(3000); 
 */
 
-  /*
+  
   refresh();
 //  Serial.println(xco);
   Serial.println(yco);
-  findObject();
+//  findObject();
   delay(1000);
-  */
+  
 }
 
 void refresh(){
