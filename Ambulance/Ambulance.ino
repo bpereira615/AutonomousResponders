@@ -86,10 +86,21 @@ void setup() {
 }
 
 void loop() {
+  int incomingByte;
+  while (Serial.available() > 0) {
+    // read the oldest byte in the serial buffer:
+    incomingByte = Serial.read();
+    // if it's a capital H (ASCII 72), turn on the LED:
+    if (incomingByte == 'a') {
+      break;
+    }
+  }
 
+  moveForward(2*unit_distance);
+  delay(10000000);
   //sensorTest();
 
-  
+  /*
   //move into initial position
   int back_left = sample(BACK_LEFT, numAvg);
   while(back_left < back_thresh) {
@@ -168,6 +179,7 @@ void loop() {
   Serial.println('x');
 
   delay(2000000); //TODO: exit program
+  */
 }
 
 
