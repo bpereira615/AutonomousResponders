@@ -44,6 +44,11 @@ int unit_time = 100;
 //number number of encoder clicks
 int unit_encoder = 5;
 
+
+//for loop hack, use whiles
+int idx = 0;
+
+
 void setup() {
   Serial.begin(9600);
 
@@ -90,64 +95,35 @@ void setup() {
 }
 
 void loop(){
-  delay(5000);
-  /*
-  delay(5000);
-  refresh(1);
-  delay(2000);
-  findObjectTH(1);
-//  refresh(1);
-  Serial.println(xco);
-  delay(10000000);
-  */
-  /*
-  digitalWrite(SPOOL_UP, HIGH);
-  digitalWrite(SPOOL_DOWN, LOW);
-  digitalWrite(SPOOL, HIGH);
-  delay(15);
-  digitalWrite(SPOOL, LOW);
-  delay(50);
-  //delay(1000);
-  //digitalWrite(BASE, LOW);
-  //delay(3000);
-  */
-  /*
-  // see if there's incoming serial data:
-  while (Serial.available() > 0) {
-    // read the oldest byte in the serial buffer:
-    incomingByte = Serial.read();
-    // if it's a capital H (ASCII 72), turn on the LED:
-    if (incomingByte == 'z') {
-      break;
-    }
-  }
-  
-
-  forward();
-  delay(3000);
-  backward();
-  delay(3000); 
-*/
-
+  //initial delay for motor spike control
+  delay(3000);  
  
-  //ACTUAL CONTROL FLOW
-  refresh(1);
-  for(int i; i<10;i++){//45 degrees
+  //move to 45 degree starting point
+  idx = 0;
+  while(idx < 10) { //45 degrees
+    Serial.println(idx);
     ccw();
+    idx++;
   }
+
+  //center on the object, first counter/clockwise, then for/backward
   delay(2000);//lets pixy find object
   findObjectTH(1);
   findObjectR(1);
 
+  //fix claw drop when carriage moves out
   digitalWrite(SPOOL_UP,HIGH);
   digitalWrite(SPOOL_DOWN,LOW);
   digitalWrite(SPOOL, HIGH);
   delay(1000);
   digitalWrite(SPOOL, LOW);
   
+  //drop the claw
   open_claw();
   claw_down(1600);
   delay(1500);
+  
+  //grab victim and pick up
   close_claw();
   delay(1500);
   digitalWrite(SPOOL_UP,HIGH);
@@ -155,39 +131,55 @@ void loop(){
   digitalWrite(SPOOL, HIGH);
   delay(2500);
   digitalWrite(SPOOL, LOW);
-  for(int i; i<20;i++){//90 degrees
+  
+  
+  //turn 90 degrees to allow fror ambulance viewing
+  idx = 0;
+  while(idx < 20) { //90 degrees
     ccw();
+    idx++;
   }
+  
+  //find the ambulance and center carriage
   refresh(2);
   delay(2000);
   findObjectTH(2);
   findObjectR(2);
 
+  //fix claw drop when carriage moves out  
   digitalWrite(SPOOL_UP,HIGH);
   digitalWrite(SPOOL_DOWN,LOW);
   digitalWrite(SPOOL, HIGH);
   delay(1000);
   digitalWrite(SPOOL, LOW);
 
+  //lower victim onto ambulance
   claw_down(4850);
   
+  //release victivm
   delay(1500);
   open_claw();
   delay(1500);
-  claw_up(4600);
+  claw_up(4600 / 2); //temp divide by 2
 
-  Serial.print('a');
-  delay(10000000);
+  //send signal to ambulance
+  while(true){
+    Serial.print('a');
+  }
+  
 }
 
 void refresh(int code){//updates x and y coordinates of selected color code
   block=pixy.getBlocks();
   if(block){
-    for(int i;i<block;i++){
-      if(pixy.blocks[i].signature==code){
-        xco=pixy.blocks[i].x;
-        yco=pixy.blocks[i].y;
+
+    idx = 0;
+    while(idx < block) {
+      if(pixy.blocks[idx].signature==code){
+        xco=pixy.blocks[idx].x;
+        yco=pixy.blocks[idx].y;
       }
+      idx++;
     }
   }
 }

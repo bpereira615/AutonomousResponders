@@ -86,21 +86,9 @@ void setup() {
 }
 
 void loop() {
-  int incomingByte;
-  while (Serial.available() > 0) {
-    // read the oldest byte in the serial buffer:
-    incomingByte = Serial.read();
-    // if it's a capital H (ASCII 72), turn on the LED:
-    if (incomingByte == 'a') {
-      break;
-    }
-  }
 
-  moveForward(2*unit_distance);
-  delay(10000000);
   //sensorTest();
 
-  /*
   //move into initial position
   int back_left = sample(BACK_LEFT, numAvg);
   while(back_left < back_thresh) {
@@ -178,8 +166,8 @@ void loop() {
   //send signal to crane to begin
   Serial.println('x');
 
+  move_hospital();
   delay(2000000); //TODO: exit program
-  */
 }
 
 
@@ -414,7 +402,6 @@ void turnLeft(){
   
 }
 void moveForward(int dist){//forward method, takes number of shaft revolutions
-//  /*
   int lcorrect=0;
   int rcorrect=0;
   float currentHeading=0;
@@ -459,29 +446,6 @@ void moveForward(int dist){//forward method, takes number of shaft revolutions
     delay(speed_control);
   }
   return;
- // */
-  /*
-  ldist=0;//rezeros distance counter to avoid issues with int rollover
-  rdist=0;
-  int oldxr=rdist;//intermediate variables for while loops
-  int oldxl=ldist;
-  digitalWrite(l1,HIGH);//both wheels forward
-  digitalWrite(l2,LOW);
-  digitalWrite(r1,HIGH);
-  digitalWrite(r2,LOW); 
-  while(ldist<25){//run until robot has moved far enough forward
-    digitalWrite(right,HIGH);//pair of while loops to ensure that one wheel does not get too far
-    while(rdist==oldxr){}//ahead of other wheel, uses encoders to monitor
-    digitalWrite(right,LOW);
-    oldxr=rdist;
-    digitalWrite(left,HIGH);
-    while(ldist==oldxl){}
-    digitalWrite(left,LOW);
-    oldxl=ldist;
-    delay(speed_control);
-  }
-  return;
-  */
 }
 
 void RightDistance(){//handles interrupt from right wheel motor encoder
@@ -546,5 +510,19 @@ void calibrateIMU() {
     Rright=up+90;
   }
 
+}
+
+void move_{
+  
+ int incomingByte;
+  while (Serial.available() > 0) {
+    // read the oldest byte in the serial buffer:
+    incomingByte = Serial.read();
+    // if it's a capital H (ASCII 72), turn on the LED:
+    if (incomingByte == 'a') {
+      moveForward(2*unit_distance);
+      break;
+    }
+  }
 }
 
