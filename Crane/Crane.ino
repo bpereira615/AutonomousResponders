@@ -6,8 +6,8 @@
 
 //MOTOR PIN SETUP
 #define SPOOL 5
-#define SPOOL_UP 8
-#define SPOOL_DOWN 9
+#define SPOOL_UP 9
+#define SPOOL_DOWN 8
 #define SPOOL_INTER 2
 
 #define BASE 10
@@ -96,8 +96,13 @@ void setup() {
 
 void loop(){
   //initial delay for motor spike control
-  delay(3000);  
- 
+
+
+  delay(3000);
+  //wait_ambulance();
+
+  Serial.print("BEGIN");
+
   //move to 45 degree starting point
   idx = 0;
   while(idx < 10) { //45 degrees
@@ -117,22 +122,20 @@ void loop(){
   digitalWrite(SPOOL, HIGH);
   delay(1000);
   digitalWrite(SPOOL, LOW);
-  
+
+
   //drop the claw
   open_claw();
-  claw_down(1600);
+  claw_down(1600*3);
   delay(1500);
+
   
   //grab victim and pick up
   close_claw();
   delay(1500);
-  digitalWrite(SPOOL_UP,HIGH);
-  digitalWrite(SPOOL_DOWN,LOW);
-  digitalWrite(SPOOL, HIGH);
-  delay(2500);
-  digitalWrite(SPOOL, LOW);
+  claw_up(4500);
   
-  
+
   //turn 90 degrees to allow fror ambulance viewing
   idx = 0;
   while(idx < 20) { //90 degrees
@@ -152,20 +155,21 @@ void loop(){
   digitalWrite(SPOOL, HIGH);
   delay(1000);
   digitalWrite(SPOOL, LOW);
+  
 
   //lower victim onto ambulance
-  claw_down(4850);
+  claw_down(4850*3);
   
   //release victivm
   delay(1500);
   open_claw();
   delay(1500);
-  claw_up(4600 / 2); //temp divide by 2
+  claw_up(10000); //temp divide by 2
 
-  //send signal to ambulance
-  while(true){
-    Serial.print('a');
-  }
+
+  //signal_ambulance();
+
+  delay(10000000000);
   
 }
 
@@ -209,7 +213,7 @@ void findObjectTH(int code){//finds color code in Theta direction
     refresh(code);
     if(xco>170){//pixy is installed backwards
       ccw();
-    }else if(xco<150){
+    }else if(xco<140){
       cw();
     }else{ 
       found=true;
@@ -314,6 +318,26 @@ void close_claw() {
   claw_servo.write(180);
 }
 
+void wait_ambulance() {
+  int incomingByte;
+  while (Serial.available() > 0) {
+    // read the oldest byte in the serial buffer:
+    incomingByte = Serial.read();
+    if (incomingByte == 'z') {
+      break;
+    }
+  }
+}
+
+
+void signal_ambulance() {
+  idx = 0;
+  while(idx < 10) {
+    Serial.print('y');
+    delay(200);
+    idx++;
+  }
+}
 void SpoolDistance(){//handles interrupt from right wheel motor encoder
   spool_dist++;
 }

@@ -89,6 +89,7 @@ void loop() {
 
   //sensorTest();
 
+  
   //move into initial position
   int back_left = sample(BACK_LEFT, numAvg);
   while(back_left < back_thresh) {
@@ -136,38 +137,49 @@ void loop() {
   
 
   //move to exit choice
-  obstacle_avoidance(unit_distance * 2.5);
+  Serial.println(1);
+  obstacle_avoidance(unit_distance * 2.8);
 
   temp_blocked = false;
 
+  Serial.println(2);
   turnRight();
-  test = obstacle_avoidance(unit_distance * 1.25);
+
+ 
+  test = obstacle_avoidance(unit_distance * 1.35);
+  Serial.println(3);
   delay(1000);
-  turnLeft();
 
 
   if(sample(BACK_LEFT, numAvg) > (250)) { //exit blocked
+    Serial.println(4);
     turnLeft();
     turnLeft();
-    obstacle_avoidance(unit_distance * 2.5);
+    obstacle_avoidance(unit_distance * 2.6);
     delay(1000);
     turnRight();
-    moveForward(unit_distance * 2);
+    moveForward(unit_distance * 3); //move foward so not triggered by floor 
     delay(1000);
     turnRight();
-    obstacle_avoidance(unit_distance * 2.5);
+    obstacle_avoidance(unit_distance * 3);
     delay(1000);
   } else {
+    Serial.println(5);
     turnLeft();
 
-    moveForward(unit_distance);
+    moveForward(unit_distance*3);
+    turnRight();
   }
 
   //send signal to crane to begin
-  Serial.println('x');
+  signal_crane();
 
-  move_hospital();
+  delay(1000);
+  wait_crane();
+  moveForward(2*unit_distance);
   delay(2000000); //TODO: exit program
+
+
 }
 
 
@@ -512,15 +524,22 @@ void calibrateIMU() {
 
 }
 
-void move_{
+void signal_crane() {
+  //sufficiently long for crane to see
+  for(int i = 0; i < 10; ++i) {
+    Serial.print('z');
+    delay(200);
+  }
+}
+
+void wait_crane(){
   
  int incomingByte;
   while (Serial.available() > 0) {
     // read the oldest byte in the serial buffer:
     incomingByte = Serial.read();
     // if it's a capital H (ASCII 72), turn on the LED:
-    if (incomingByte == 'a') {
-      moveForward(2*unit_distance);
+    if (incomingByte == 'x') {
       break;
     }
   }
