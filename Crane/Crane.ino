@@ -89,7 +89,7 @@ void setup() {
   analogWrite(CARRIAGE_MOTOR, 0);
 
   claw_servo.attach(CLAW_SERVO);
-  close_claw();
+ // close_claw(); //put after first delay
 
   
 }
@@ -99,10 +99,35 @@ void loop(){
 
 
   delay(3000);
-  //wait_ambulance();
 
-  Serial.print("BEGIN");
+   /*
+  Serial.println("SETUP DONE");
+  close_claw();
 
+  Serial.println("WAIT AMBO"); 
+  wait_ambulance();
+
+  open_claw();
+  delay(1000);
+  close_claw();
+  delay(1000);
+  open_claw();
+  delay(1000);
+
+  signal_ambulance();
+
+
+    */
+
+
+
+
+
+  // /*
+  close_claw();
+
+  wait_ambulance();
+  
   //move to 45 degree starting point
   idx = 0;
   while(idx < 10) { //45 degrees
@@ -167,7 +192,9 @@ void loop(){
   claw_up(10000); //temp divide by 2
 
 
-  //signal_ambulance();
+  signal_ambulance();
+
+  // */
 
   delay(10000000000);
   
@@ -319,12 +346,16 @@ void close_claw() {
 }
 
 void wait_ambulance() {
+  boolean done=false;
   int incomingByte;
-  while (Serial.available() > 0) {
-    // read the oldest byte in the serial buffer:
-    incomingByte = Serial.read();
-    if (incomingByte == 'z') {
-      break;
+  while(!done){
+    while (Serial.available() > 0) {
+      // read the oldest byte in the serial buffer:
+      incomingByte = Serial.read();
+      if (incomingByte == 'z') {
+        done=true;
+        break;
+      }
     }
   }
 }

@@ -89,7 +89,15 @@ void loop() {
 
   //sensorTest();
 
-  
+  /*
+  delay(10000);
+  signal_crane();
+  wait_crane();
+  moveForward(1000);
+  */
+
+
+
   //move into initial position
   int back_left = sample(BACK_LEFT, numAvg);
   while(back_left < back_thresh) {
@@ -145,11 +153,11 @@ void loop() {
   Serial.println(2);
   turnRight();
 
- 
+  
+
   test = obstacle_avoidance(unit_distance * 1.35);
   Serial.println(3);
   delay(1000);
-
 
   if(sample(BACK_LEFT, numAvg) > (250)) { //exit blocked
     Serial.println(4);
@@ -530,17 +538,20 @@ void signal_crane() {
     Serial.print('z');
     delay(200);
   }
+
 }
 
 void wait_crane(){
-  
- int incomingByte;
-  while (Serial.available() > 0) {
-    // read the oldest byte in the serial buffer:
-    incomingByte = Serial.read();
-    // if it's a capital H (ASCII 72), turn on the LED:
-    if (incomingByte == 'x') {
-      break;
+  boolean done=false;
+  int incomingByte;
+  while(!done){
+    while (Serial.available() > 0) {
+      // read the oldest byte in the serial buffer:
+      incomingByte = Serial.read();
+      if (incomingByte == 'y') {
+        done=true;
+        break;
+      }
     }
   }
 }
