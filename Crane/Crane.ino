@@ -123,11 +123,11 @@ void loop(){
 
 
 
-  // /*
+  // 
   close_claw();
 
-  wait_ambulance();
-  
+//  wait_ambulance();
+  /*
   //move to 45 degree starting point
   idx = 0;
   while(idx < 10) { //45 degrees
@@ -135,8 +135,9 @@ void loop(){
     ccw();
     idx++;
   }
-
+*/
   //center on the object, first counter/clockwise, then for/backward
+  refresh(1);
   delay(2000);//lets pixy find object
   findObjectTH(1);
   findObjectR(1);
@@ -159,6 +160,8 @@ void loop(){
   close_claw();
   delay(1500);
   claw_up(4500);
+
+  backCorrect();
   
 
   //turn 90 degrees to allow fror ambulance viewing
@@ -170,7 +173,7 @@ void loop(){
   
   //find the ambulance and center carriage
   refresh(2);
-  delay(2000);
+  delay(4000);
   findObjectTH(2);
   findObjectR(2);
 
@@ -183,20 +186,20 @@ void loop(){
   
 
   //lower victim onto ambulance
-  claw_down(4850*3);
+  claw_down(15000);//14550
   
   //release victivm
   delay(1500);
   open_claw();
   delay(1500);
-  claw_up(10000); //temp divide by 2
+  claw_up(14000); //temp divide by 2
 
 
   signal_ambulance();
 
   // */
 
-  delay(10000000000);
+  delay(100000000);
   
 }
 
@@ -219,7 +222,7 @@ void findObjectR(int code){//finds color code in R direction
   boolean found = false;
   while(!found){
     refresh(code);
-    if(yco<90){
+    if(yco<80){
       forward();
     }else if(yco>110){
       back();
@@ -251,12 +254,12 @@ void findObjectTH(int code){//finds color code in Theta direction
 void forward(){
   digitalWrite(CARRIAGE_FORWARD, HIGH);
   digitalWrite(CARRIAGE_BACKWARD, LOW);
-  Serial.print("Crane claw forward: ");
-  Serial.println(yco);
+//  Serial.print("Crane claw forward: ");
+//  Serial.println(yco);
   digitalWrite(SPOOL_UP,HIGH);
   digitalWrite(SPOOL_DOWN,LOW);
   digitalWrite(SPOOL, HIGH);
-  analogWrite(CARRIAGE_MOTOR, 255); //TODO: calibration
+  digitalWrite(CARRIAGE_MOTOR, HIGH); //TODO: calibration
   delay(unit_time);
   digitalWrite(CARRIAGE_MOTOR, LOW);
   digitalWrite(SPOOL, LOW);
@@ -266,10 +269,21 @@ void forward(){
 void back(){
   digitalWrite(CARRIAGE_FORWARD, LOW);
   digitalWrite(CARRIAGE_BACKWARD, HIGH);
-  Serial.print("Crane claw backward: ");
-  Serial.println(yco);
-  analogWrite(CARRIAGE_MOTOR, 255);
+//  Serial.print("Crane claw backward: ");
+//  Serial.println(yco);
+  digitalWrite(CARRIAGE_MOTOR, HIGH);
   delay(unit_time);
+  digitalWrite(CARRIAGE_MOTOR, LOW);
+  return;
+}
+
+void backCorrect(){
+  digitalWrite(CARRIAGE_FORWARD, HIGH);
+  digitalWrite(CARRIAGE_BACKWARD, LOW);
+//  Serial.print("Crane claw backward: ");
+//  Serial.println(yco);
+  digitalWrite(CARRIAGE_MOTOR, HIGH);
+  delay(4000);
   digitalWrite(CARRIAGE_MOTOR, LOW);
   return;
 }
