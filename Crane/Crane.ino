@@ -127,19 +127,13 @@ void loop(){
   close_claw();
 
 //  wait_ambulance();
-  /*
-  //move to 45 degree starting point
-  idx = 0;
-  while(idx < 10) { //45 degrees
-    Serial.println(idx);
-    ccw();
-    idx++;
-  }
-*/
+
   //center on the object, first counter/clockwise, then for/backward
   refresh(1);
   delay(2000);//lets pixy find object
   findObjectTH(1);
+  findObjectTH(1);
+  findObjectR(1);
   findObjectR(1);
 
   //fix claw drop when carriage moves out
@@ -152,14 +146,13 @@ void loop(){
 
   //drop the claw
   open_claw();
-  claw_down(1600*3);
+  claw_down(1640*3);
   delay(1500);
 
   
   //grab victim and pick up
   close_claw();
-  delay(1500);
-  claw_up(4500);
+  claw_up(4300);
 
   backCorrect();
   
@@ -173,8 +166,10 @@ void loop(){
   
   //find the ambulance and center carriage
   refresh(2);
-  delay(4000);
+  delay(2000);
   findObjectTH(2);
+  findObjectTH(2);
+  findObjectR(2);
   findObjectR(2);
 
   //fix claw drop when carriage moves out  
@@ -186,13 +181,12 @@ void loop(){
   
 
   //lower victim onto ambulance
-  claw_down(15000);//14550
+  claw_down(15500);//14550
   
   //release victivm
   delay(1500);
   open_claw();
-  delay(1500);
-  claw_up(14000); //temp divide by 2
+  claw_up(14500); //temp divide by 2
 
 
   signal_ambulance();
@@ -205,8 +199,8 @@ void loop(){
 
 void refresh(int code){//updates x and y coordinates of selected color code
   block=pixy.getBlocks();
+  delay(50);
   if(block){
-
     idx = 0;
     while(idx < block) {
       if(pixy.blocks[idx].signature==code){
@@ -256,13 +250,15 @@ void forward(){
   digitalWrite(CARRIAGE_BACKWARD, LOW);
 //  Serial.print("Crane claw forward: ");
 //  Serial.println(yco);
+/*
   digitalWrite(SPOOL_UP,HIGH);
   digitalWrite(SPOOL_DOWN,LOW);
   digitalWrite(SPOOL, HIGH);
+  */
   digitalWrite(CARRIAGE_MOTOR, HIGH); //TODO: calibration
   delay(unit_time);
   digitalWrite(CARRIAGE_MOTOR, LOW);
-  digitalWrite(SPOOL, LOW);
+//  digitalWrite(SPOOL, LOW);
   return;
 }
 
@@ -353,10 +349,12 @@ void claw_up(int dist){//forward method, takes number of shaft revolutions
 
 void open_claw() {
   claw_servo.write(0);
+  delay(1500);
 }
 
 void close_claw() {
   claw_servo.write(180);
+  delay(1500);
 }
 
 void wait_ambulance() {
