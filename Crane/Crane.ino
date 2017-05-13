@@ -125,8 +125,8 @@ void loop(){
 
   // 
   close_claw();
-
-//  wait_ambulance();
+  
+  wait_ambulance();
 
   //center on the object, first counter/clockwise, then for/backward
   refresh(1);
@@ -186,10 +186,12 @@ void loop(){
   //release victivm
   delay(1500);
   open_claw();
-  claw_up(14500); //temp divide by 2
+  claw_up(14500/10); //temp divide by 2
 
 
   signal_ambulance();
+  
+  claw_up(14500/10*9);
 
   // */
 

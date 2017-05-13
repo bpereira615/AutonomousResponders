@@ -534,7 +534,7 @@ void calibrateIMU() {
 
 void signal_crane() {
   //sufficiently long for crane to see
-  for(int i = 0; i < 10; ++i) {
+  for(int i = 0; i < 100; ++i) {
     Serial.print('z');
     delay(200);
   }
