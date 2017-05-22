@@ -1,5 +1,4 @@
 # EN.530.421 Mechatronics - Spring 2017
-Final Design Competition
 
 ## Authors:
 * Benjamin Hoertnagl-Pereira (bhoertn1@jhu.edu)
@@ -19,3 +18,10 @@ We aimed to design and build the next generation of emergency responders. Our sy
 We opted for a two system solution comprising of :
 1. Ambulance - mobile robot that would traverse the "city" roads, avoiding potential traffic or road blockages as necessary, and offer a cradle to carry the victim to the hospital
 2. Crane - fixed robot mounted to cliff that will locate victim, secure the strechter with the victim, and transfer the load to the waiting ambulance
+
+## Links:
+### Promotional:
+[![Promotional](http://img.youtube.com/vi/cP3okoJLccQ/0.jpg)](http://www.youtube.com/watch?v=cP3okoJLccQ)
+
+### Demonstration:
+[![Demonstration](http://img.youtube.com/vi/A3yeBLUBmeI/0.jpg)](http://www.youtube.com/watch?v=A3yeBLUBmeI)

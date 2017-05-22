@@ -98,6 +98,10 @@ void loop() {
 
 
 
+
+
+
+
   //move into initial position
   int back_left = sample(BACK_LEFT, numAvg);
   while(back_left < back_thresh) {
@@ -137,7 +141,7 @@ void loop() {
   //try path 2 if blocked
   if(temp_blocked) {
     turnLeft();
-    obstacle_avoidance(unit_distance * 3 - 7);
+    obstacle_avoidance(unit_distance * 3 - 5);
     delay(1000);
     turnLeft();
     obstacle_avoidance(unit_distance * 3);
@@ -146,7 +150,7 @@ void loop() {
 
   //move to exit choice
   Serial.println(1);
-  obstacle_avoidance(unit_distance * 2.8);
+  obstacle_avoidance(unit_distance * 2.8-3);
 
   temp_blocked = false;
 
@@ -155,7 +159,7 @@ void loop() {
 
   
 
-  test = obstacle_avoidance(unit_distance * 1.35);
+  test = obstacle_avoidance(unit_distance * 1.35+4);
   Serial.println(3);
   delay(1000);
 
@@ -163,7 +167,7 @@ void loop() {
     Serial.println(4);
     turnLeft();
     turnLeft();
-    obstacle_avoidance(unit_distance * 2.6);
+    obstacle_avoidance(unit_distance * 2.6+8);
     delay(1000);
     turnRight();
     moveForward(unit_distance * 3); //move foward so not triggered by floor 
@@ -184,8 +188,9 @@ void loop() {
 
   delay(1000);
   wait_crane();
-  moveForward(2*unit_distance);
+  moveHospital(3*unit_distance);
   delay(2000000); //TODO: exit program
+
 
 
 }
@@ -467,6 +472,34 @@ void moveForward(int dist){//forward method, takes number of shaft revolutions
   }
   return;
 }
+
+
+void moveHospital(int dist){//forward method, takes number of shaft revolutions
+  int lcorrect=0;
+  int rcorrect=0;
+  ldist=0;//rezeros distance counter to avoid issues with int rollover
+  rdist=0;
+  int oldxr=rdist;//intermediate variables for while loops
+  int oldxl=ldist;
+  digitalWrite(l1,HIGH);//both wheels forward
+  digitalWrite(l2,LOW);
+  digitalWrite(r1,HIGH);
+  digitalWrite(r2,LOW); 
+  while(ldist<25*dist){//run until robot has moved far enough forward
+    sensors_event_t event;
+    digitalWrite(right,HIGH);//pair of while loops to ensure that one wheel does not get too far
+    while(rdist==oldxr+rcorrect){}//ahead of other wheel, uses encoders to monitor
+    digitalWrite(right,LOW);
+    oldxr=rdist;
+    digitalWrite(left,HIGH);
+    while(ldist==oldxl+lcorrect){}
+    digitalWrite(left,LOW);
+    oldxl=ldist;
+    delay(speed_control);
+  }
+  return;
+}
+
 
 void RightDistance(){//handles interrupt from right wheel motor encoder
   rdist++;
